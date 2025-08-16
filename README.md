@@ -151,7 +151,7 @@ nvm use 22.14.0
 
 ## License
 
-[License information to be added]
+MIT
 
 ---
 
@@ -165,4 +165,4 @@ For questions and support, please open an issue in the GitHub repository.
 
 ---
 
-**Built with ❤️ using modern web technologies**
+
