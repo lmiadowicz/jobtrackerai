@@ -165,4 +165,209 @@ For questions and support, please open an issue in the GitHub repository.
 
 ---
 
+## API Documentation
+
+### Profiles API
+
+Base URL: `/api/profiles`
+
+#### List Profiles
+
+```http
+GET /api/profiles
+```
+
+Query Parameters:
+- `limit` (optional, default: 20) - Number of items per page (1-100)
+- `offset` (optional, default: 0) - Pagination offset
+- `sort_by` (optional, default: "created_at") - Sort field: "created_at", "updated_at", "name"
+- `sort_dir` (optional, default: "desc") - Sort direction: "asc", "desc"
+
+Response:
+```json
+{
+  "data": {
+    "items": [
+      {
+        "id": "uuid",
+        "user_id": "uuid",
+        "name": "string",
+        "is_default": boolean,
+        "master_cv": "string?",
+        "pref_salary_min": number?,
+        "pref_salary_max": number?,
+        "pref_salary_currency": "string?",
+        "pref_salary_period": "monthly|yearly|hourly?",
+        "created_at": "string",
+        "updated_at": "string"
+      }
+    ],
+    "total": number
+  },
+  "error": null
+}
+```
+
+#### Create Profile
+
+```http
+POST /api/profiles
+```
+
+Request Body:
+```json
+{
+  "name": "string (1-120 chars)",
+  "is_default": "boolean?",
+  "master_cv": "string? (max 200KB)",
+  "pref_salary_min": "number?",
+  "pref_salary_max": "number?",
+  "pref_salary_currency": "ISO 4217 code?",
+  "pref_salary_period": "monthly|yearly|hourly?"
+}
+```
+
+Response:
+```json
+{
+  "data": {
+    "id": "uuid",
+    "user_id": "uuid",
+    "name": "string",
+    // ... same as list response
+  },
+  "error": null
+}
+```
+
+#### Get Profile
+
+```http
+GET /api/profiles/:id
+```
+
+Parameters:
+- `id` (UUID) - Profile ID
+
+Response:
+```json
+{
+  "data": {
+    "id": "uuid",
+    "user_id": "uuid",
+    "name": "string",
+    // ... same as list response
+    "profile_skills": [
+      { "skill_id": "uuid" }
+    ]
+  },
+  "error": null
+}
+```
+
+#### Update Profile
+
+```http
+PUT /api/profiles/:id
+```
+
+Parameters:
+- `id` (UUID) - Profile ID
+
+Request Body: Same as POST but all fields optional
+
+Response: Same as GET
+
+#### Delete Profile
+
+```http
+DELETE /api/profiles/:id
+```
+
+Parameters:
+- `id` (UUID) - Profile ID
+
+Response:
+```json
+{
+  "data": { "ok": true },
+  "error": null
+}
+```
+
+#### Attach Skills
+
+```http
+POST /api/profiles/:id/skills
+```
+
+Parameters:
+- `id` (UUID) - Profile ID
+
+Request Body:
+```json
+{
+  "skill_ids": ["uuid"] // 1-200 skill IDs
+}
+```
+
+Response:
+```json
+{
+  "data": {
+    "attached": number
+  },
+  "error": null
+}
+```
+
+#### Detach Skills
+
+```http
+DELETE /api/profiles/:id/skills
+```
+
+Parameters:
+- `id` (UUID) - Profile ID
+
+Request Body: Same as POST /skills
+
+Response:
+```json
+{
+  "data": {
+    "detached": number
+  },
+  "error": null
+}
+```
+
+### Error Responses
+
+All endpoints may return the following error responses:
+
+```json
+{
+  "data": null,
+  "error": {
+    "code": "error_code",
+    "message": "Human readable message",
+    "details": "Optional details"
+  }
+}
+```
+
+Error Codes:
+- `server_error` (500) - Internal server error
+- `unauthorized` (401) - Authentication required
+- `bad_request` (400) - Invalid input data
+- `not_found` (404) - Resource not found
+- `conflict` (409) - Resource conflict (e.g., duplicate name)
+
+Special Cases:
+- Creating/updating with `is_default=true` will unset `is_default` on other profiles
+- Cannot delete a profile referenced by applications
+- Cannot delete the last default profile if it's the only profile
+- Skills operations are idempotent (duplicates are ignored)
+
 
